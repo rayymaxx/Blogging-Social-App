@@ -3,6 +3,10 @@ import connectDB from "./config/db.js"; // Path to start the db connection
 import dotenv from "dotenv";
 import cors from "cors";
 import authRoutes from './Routes/authRoutes.js'; 
+import userRoutes from "./Routes/userRoutes.js";
+
+app.use("/api/users", userRoutes);
+
 
 dotenv.config();
 
