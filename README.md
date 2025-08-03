@@ -9,6 +9,9 @@ The backend exposes RESTful APIs that the React frontend consumes via AJAX reque
 
 ## Project Structure
 
+
+
+
 BLOGGING-SOCIAL-APP
 ├── back-end/                  # Backend server (Node.js, Express APIs)
 │   ├── Controllers/           # Request handlers (MVC pattern)
