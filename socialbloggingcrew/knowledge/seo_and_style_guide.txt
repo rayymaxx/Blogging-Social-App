@@ -1,0 +1,10 @@
+Content Policy:
+- All blog posts must maintain a positive and professional tone. Avoid controversial or political topics.
+- All content must be original and free of plagiarism.
+- Headlines must use title case (e.g., "The Top 5 Tips for Social Media Marketing").
+
+SEO Guidelines:
+- Primary keyword must be in the title and the first paragraph.
+- Use 3-5 relevant hashtags in a separate section at the end of the post.
+- Use a clear hierarchy of headings (H1, H2, H3) for readability.
+- Meta-descriptions should be 1-2 sentences and include the primary keyword.

@@ -1,7 +1,9 @@
 import os
 from dotenv import load_dotenv
 from crewai import Agent, Crew, Task, Process
-from socialbloggingcrew.tools.custom_tool import get_search_tool
+
+# --> UPDATED IMPORT: We need to import the internal knowledge tool as well
+from socialbloggingcrew.tools.custom_tool import get_search_tool, get_internal_knowledge_tool
 from socialbloggingcrew.config.agents import agents_config
 from socialbloggingcrew.config.tasks import tasks_config
 
@@ -16,14 +18,19 @@ class Socialbloggingcrew:
     def create_agents(self):
         # The TrendHunterAgent needs the search tool
         search_tool = get_search_tool()
+        
+        # --> NEW: Get the internal knowledge tool
+        rag_tool = get_internal_knowledge_tool()
 
         trend_hunter_agent = Agent(
             config=self.agents_config['trend_hunter'],
             tools=[search_tool]
         )
 
+        # --> UPDATED AGENT: Assign the RAG tool to the writer
         writer_agent = Agent(
-            config=self.agents_config['writer']
+            config=self.agents_config['writer'],
+            tools=[rag_tool]
         )
         
         editor_agent = Agent(

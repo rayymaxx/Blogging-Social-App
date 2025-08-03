@@ -1,5 +1,6 @@
 import os
-from crewai_tools import SerperDevTool
+from crewai_tools import SerperDevTool, RagTool
+from socialbloggingcrew.rag import get_rag_tool
 from dotenv import load_dotenv
 
 # We should load dotenv here as well to be safe
@@ -13,3 +14,9 @@ def get_search_tool():
     
     os.environ['SERPER_API_KEY'] = serper_api_key
     return SerperDevTool()
+
+def get_internal_knowledge_tool():
+    """Returns a RagTool instance with the internal knowledge base retriever."""
+    # This function will call your get_rag_tool() and wrap it in a RagTool
+    retriever = get_rag_tool()
+    return RagTool(retriever=retriever)
