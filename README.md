@@ -10,32 +10,22 @@ The backend exposes RESTful APIs that the React frontend consumes via AJAX reque
 ## Project Structure
 
 
-/BLOGGING-SOCIAL-APP
-├── back-end/ # Backend server folder (Node.js, Express.js APIs)
-│ ├── Controllers/ # Request handlers for routes (MVC structure)
-│ │ ├── authController.js # Authentication logic (signup, login)
-│ │ ├── userController.js # User related logic
-│ │ └── ... # Other controllers
-│ ├── middleware/ # Middleware functions
-│ │ └── authMiddleware.js # Authentication & authorization checks
-│ ├── models/ # Mongoose models for MongoDB
-│ │ ├── User.js # User schema & pre-save password hashing
-│ │ ├── Post.js # Blog post schema
-│ │ ├── Comment.js # Comment schema
-│ │ └── ... # Additional models like notifications, etc.
-│ ├── Routes/ # Express route definitions
-│ │ ├── authRoutes.js # Routes for signup, login
-│ │ ├── userRoutes.js # Routes to get user data, update users
-│ │ ├── postRoutes.js # Routes for CRUD operations on posts
-│ │ └── ... # Other routes like comments, admin
-│ ├── app.js or index.js # App entry point where Express server is configured
-│ ├── package.json # Backend dependencies & scripts
-│ └── .env # Environment variables file (MongoURI, JWT secrets)
-├── frontend/ # React frontend folder
-│ ├── src/ # React source code (components, pages, services)
-│ ├── public/ # Static files like index.html
-│ ├── package.json # Frontend dependencies & scripts
-│ ├── .gitignore # Files/folders to ignore in Git for frontend
-│ └── README.md # Frontend README (optional)
-├── .gitignore # Repo-wide Git ignore file
-└── README.md # This project README
+---
+
+## Backend Setup & Description
+
+The backend is built with Node.js, Express.js, and MongoDB using Mongoose ODM. It handles all the application logic and data management.
+
+### Key Features
+
+- **User Authentication:** Secure sign up and login with password hashing via bcrypt and JWT token issuance.
+- **Role-Based Authorization:** Differentiate between admin and normal users for protected routes.
+- **Blog Posts Management:** Create, update, delete, and get blog posts with categories, tags, likes.
+- **Comments & Likes:** Users can comment on posts and like posts.
+- **Follow System:** Users can follow other authors.
+- **Notifications:** System to notify users about interactions on their posts.
+- **RESTful APIs:** Clean, maintainable routes separated by concern (auth, posts, users).
+
+### How to Run Backend
+
+1. Navigate to the backend folder:
