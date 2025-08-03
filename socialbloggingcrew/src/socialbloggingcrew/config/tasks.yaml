@@ -1,0 +1,19 @@
+research_task:
+  description: "Conduct a comprehensive analysis of the latest social media trends, popular keywords, and engaging content formats related to the topic: '{topic}'. Identify key influencers and conversation starters to inform the blog post's strategy."
+  expected_output: "A detailed report with a list of trending topics, popular keywords, relevant hashtags, and key takeaways that can be used to write a captivating blog post."
+  agent: trend_hunter
+
+writing_task:
+  description: "Draft a high-quality, SEO-optimized blog post based on the research findings. The post should be engaging, well-structured with clear headings, and written in a tone that is suitable for a social media-based platform. The current year is {current_year}."
+  expected_output: "A complete blog post in markdown format, with a catchy title, an introduction, body paragraphs, and a conclusion. The content should be fresh, original, and tailored to the audience."
+  agent: writer
+
+editing_task:
+  description: "Review and refine the drafted blog post. Focus on improving grammar, punctuation, and sentence structure. Ensure the tone is consistent, professional, and free of any jargon. The final output must be ready for publication."
+  expected_output: "A polished, professional, and final version of the blog post, ready for the summarizer."
+  agent: editor
+
+summarizing_task:
+  description: "Create a short, catchy summary of the final blog post. Also, generate a list of 5-7 relevant hashtags and a brief meta-description to improve its SEO and social media discoverability."
+  expected_output: "A concise summary (1-2 paragraphs), a list of 5-7 relevant hashtags, and a meta-description, all in a single, easy-to-read format."
+  agent: summarizer
