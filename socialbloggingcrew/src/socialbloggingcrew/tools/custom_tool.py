@@ -1,22 +1,41 @@
-import os
+from langchain_google_genai import ChatGoogleGenerativeAI
 from crewai_tools import SerperDevTool, RagTool
-from socialbloggingcrew.rag import get_rag_tool
+import os
 from dotenv import load_dotenv
 
-# We should load dotenv here as well to be safe
+# CORRECTED: The import now references the correct function name.
+from socialbloggingcrew.rag import get_vector_db
+
+# Load environment variables from .env
 load_dotenv()
 
+# Instantiate the Gemini LLM
+gemini_llm = ChatGoogleGenerativeAI(
+    model="gemini-1.5-flash-latest",
+    google_api_key=os.getenv("GOOGLE_API_KEY")
+)
+
 def get_search_tool():
-    """Returns a SerperDevTool instance with a valid API key."""
-    serper_api_key = os.getenv("SERPER_API_KEY")
-    if not serper_api_key:
-        raise ValueError("SERPER_API_KEY is not set in the environment variables.")
-    
-    os.environ['SERPER_API_KEY'] = serper_api_key
+    """
+    Returns a search tool using the SERPER_API_KEY.
+    """
     return SerperDevTool()
 
 def get_internal_knowledge_tool():
-    """Returns a RagTool instance with the internal knowledge base retriever."""
-    # This function will call your get_rag_tool() and wrap it in a RagTool
-    retriever = get_rag_tool()
-    return RagTool(retriever=retriever)
+    """
+    Returns a RAG tool initialized with a ChromaDB retriever and the Gemini LLM.
+    """
+    # CORRECTED: This now calls the correct function name.
+    vector_db = get_vector_db()
+
+    # Ensure the vector database was created successfully
+    if vector_db:
+        # Get the retriever instance from the vector database
+        retriever = vector_db.as_retriever()
+        
+        # Instantiate the RagTool with the retriever and the Gemini LLM
+        return RagTool(retriever=retriever, llm=gemini_llm)
+    else:
+        # If the database creation failed, return None to prevent a crash
+        print("WARNING: RAG Tool could not be initialized. Internal knowledge will not be used.")
+        return None
