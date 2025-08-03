@@ -1,14 +1,22 @@
-// backend/index.js
-const express = require('express');
-const app = express();
-const PORT = 3000;
+import express from "express";
+import connectDB from "./config/db.js"; // Path to start the db connection 
+import dotenv from "dotenv";
+import cors from "cors";
 
-// Simple route to test server
-app.get('/', (req, res) => {
-  res.send('Hellooo from Riri\'s Backend! 👑');
+dotenv.config();
+
+const app = express();
+app.use(cors());
+app.use(express.json());
+
+connectDB(); // Connect to MongoDB 
+
+const PORT = process.env.PORT || 5000;
+
+app.get("/", (req, res) => {
+  res.send("🌍 API is running...");
 });
 
-// Start the server
 app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+  console.log(`🚀 Server running on http://localhost:${PORT}`);
 });
