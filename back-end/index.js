@@ -1,24 +1,26 @@
 import express from "express";
-import connectDB from "./config/db.js"; // Path to start the db connection 
+import connectDB from "./config/db.js";
 import dotenv from "dotenv";
 import cors from "cors";
 import authRoutes from './Routes/authRoutes.js'; 
 import userRoutes from "./Routes/userRoutes.js";
 import postRoutes from './Routes/postRoutes.js';
-app.use('/api/posts', postRoutes);
 
-
-app.use("/api/users", userRoutes);
-
-
+// Initialize dotenv as early as possible
 dotenv.config();
 
+// Create the Express app first
 const app = express();
+
+// Then use your middleware and routes
 app.use(cors());
 app.use(express.json());
 
-connectDB(); // Connect to MongoDB 
+app.use('/api/posts', postRoutes);
+app.use("/api/users", userRoutes);
 app.use("/api/auth", authRoutes);
+
+connectDB(); // Connect to MongoDB 
 
 const PORT = process.env.PORT || 5000;
 
@@ -27,5 +29,5 @@ res.send("🌍 API is running...");
 });
 
 app.listen(PORT, () => {
-  console.log(`🚀 Server running on http://localhost:${PORT}`);
+console.log(`🚀 Server running on http://localhost:${PORT}`);
 });

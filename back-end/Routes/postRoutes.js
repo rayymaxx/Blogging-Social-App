@@ -36,15 +36,17 @@ import mongoose from 'mongoose';
 import express from 'express';
 //const mongoose = require('mongoose');
 const router = express.Router();
-const { verifyJWT } = require('./middleware/auth'); // Assume JWT verification middleware
+
+import { protect as verifyJWT } from '../middleware/authMiddleware.js';
+
 
 // Mongoose models (simplified)
 //const Post = require('./models/Post');
 //import Post from './models/Post'; // Post model is defined in models/Post.js
-import User from '../models/User'; // User model is defined in models/User.js
-import Post from '../models/Post'; // Post model is defined in models/Post.js
+import User from '../models/User.js'; // User model is defined in models/User.js
+import Post from '../models/Post.js'; // Post model is defined in models/Post.js
 //const User = require('./models/User');
-import Comment from '../models/Comment'; // Comment model is defined in models/Comment.js
+import Comment from '../models/Comment.js'; // Comment model is defined in models/Comment.js
 //const Comment = require('./models/Comment');
 
 // --- 1. GET /api/posts?page=1&limit=10: Pagination + author details ---
