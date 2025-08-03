@@ -54,3 +54,5 @@ async def generate_blog_post(request: BlogRequest):
         
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"An error occurred: {e}")
+
+        
