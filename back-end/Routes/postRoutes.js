@@ -31,30 +31,36 @@ export default router;
 
 */
 
-const express = require('express');
-const mongoose = require('mongoose');
+//const express = require('express');
+import mongoose from 'mongoose';
+import express from 'express';
+//const mongoose = require('mongoose');
 const router = express.Router();
 const { verifyJWT } = require('./middleware/auth'); // Assume JWT verification middleware
 
 // Mongoose models (simplified)
-const Post = require('./models/Post');
-const User = require('./models/User');
-const Comment = require('./models/Comment');
+//const Post = require('./models/Post');
+//import Post from './models/Post'; // Post model is defined in models/Post.js
+import User from '../models/User'; // User model is defined in models/User.js
+import Post from '../models/Post'; // Post model is defined in models/Post.js
+//const User = require('./models/User');
+import Comment from '../models/Comment'; // Comment model is defined in models/Comment.js
+//const Comment = require('./models/Comment');
 
 // --- 1. GET /api/posts?page=1&limit=10: Pagination + author details ---
 router.get('/posts', async (req, res) => {
-  try {
+try {
     let { page = 1, limit = 10 } = req.query;
     page = parseInt(page);
     limit = parseInt(limit);
 
     if (page < 1 || limit < 1) {
-      return res.status(400).json({ error: 'Page and limit must be positive integers' });
+    return res.status(400).json({ error: 'Page and limit must be positive integers' });
     }
 
     // Aggregation to lookup author info
     const posts = await Post.aggregate([
-      { $sort: { createdAt: -1 } },
+    { $sort: { createdAt: -1 } },
       { $skip: (page - 1) * limit },
       { $limit: limit },
       {
@@ -285,4 +291,5 @@ router.post('/posts/:id/like', verifyJWT, async (req, res) => {
   }
 });
 
-module.exports = router;
+//module.exports = router;
+export default router;
