@@ -4,6 +4,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Dict, Any
+from datetime import datetime
 
 from socialbloggingcrew.crew import Socialbloggingcrew
 
@@ -41,11 +42,14 @@ async def generate_blog_post(request: BlogRequest):
     try:
         crew_instance = Socialbloggingcrew().create_crew()
         
-        # Pass the topic from the request to the crew
-        result = crew_instance.kickoff(inputs={'topic': request.topic})
+        # We now pass the current year to the crew's kickoff method
+        inputs = {
+            'topic': request.topic,
+            'current_year': str(datetime.now().year)
+        }
         
-        # For simplicity, we'll return the raw output from the crew.
-        # In a real-world app, you'd parse this into a structured JSON response.
+        result = crew_instance.kickoff(inputs=inputs)
+        
         return {"result": result}
         
     except Exception as e:

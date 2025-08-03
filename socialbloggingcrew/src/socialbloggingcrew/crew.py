@@ -1,7 +1,7 @@
 import os
 from dotenv import load_dotenv
 from crewai import Agent, Crew, Task, Process
-from socialbloggingcrew.tools import get_search_tool
+from socialbloggingcrew.tools.custom_tool import get_search_tool
 from socialbloggingcrew.config.agents import agents_config
 from socialbloggingcrew.config.tasks import tasks_config
 
