@@ -4,6 +4,9 @@ import dotenv from "dotenv";
 import cors from "cors";
 import authRoutes from './Routes/authRoutes.js'; 
 import userRoutes from "./Routes/userRoutes.js";
+import postRoutes from './Routes/postRoutes.js';
+app.use('/api/posts', postRoutes);
+
 
 app.use("/api/users", userRoutes);
 
