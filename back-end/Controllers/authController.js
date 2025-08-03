@@ -32,32 +32,32 @@ exports.register = async (req, res) => {
         email: newUser.email,
         isAdmin: newUser.isAdmin,
         token: generateToken(newUser),
-      });
+    });
     } catch (err) {
-      res.status(500).json({ message: "Server error during registration" });
+    res.status(500).json({ message: "Server error during registration" });
     }
-  };
-  
-  // @desc    Login user
-  exports.login = async (req, res) => {
+};
+
+  //   Login user
+exports.login = async (req, res) => {
     const { email, password } = req.body;
-  
+
     try {
-      const user = await User.findOne({ email });
-      if (!user)
+    const user = await User.findOne({ email });
+    if (!user)
         return res.status(400).json({ message: "Invalid email or password" });
-  
-      const isMatch = await user.matchPassword(password);
-      if (!isMatch)
+
+    const isMatch = await user.matchPassword(password);
+    if (!isMatch)
         return res.status(400).json({ message: "Invalid email or password" });
-  
-      res.status(200).json({
+
+    res.status(200).json({
         _id: user._id,
         username: user.username,
         email: user.email,
         isAdmin: user.isAdmin,
         token: generateToken(user),
-      });
+    });
     } catch (err) {
       res.status(500).json({ message: "Server error during login" });
     }
