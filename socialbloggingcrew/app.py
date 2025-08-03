@@ -3,10 +3,13 @@ from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from typing import Dict, Any
+from typing import Dict, Any, List
 from datetime import datetime
 
 from socialbloggingcrew.crew import Socialbloggingcrew
+
+# --> NEW IMPORT: Import the functions for JSON file interaction
+from socialbloggingcrew.db import save_blog, load_blogs
 
 # Load environment variables
 load_dotenv()
@@ -50,9 +53,20 @@ async def generate_blog_post(request: BlogRequest):
         
         result = crew_instance.kickoff(inputs=inputs)
         
+        # --> NEW: Save the generated result to our JSON file
+        # We save the topic and the generated content
+        save_blog({'topic': request.topic, 'content': result})
+        
         return {"result": result}
         
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"An error occurred: {e}")
 
-        
+# --> NEW: A new endpoint to retrieve all saved blogs
+@app.get("/api/blogs")
+async def get_all_blogs():
+    try:
+        blogs = load_blogs()
+        return {"blogs": blogs}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"An error occurred: {e}")
