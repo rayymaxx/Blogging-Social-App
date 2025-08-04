@@ -20,6 +20,8 @@ app.use('/api/posts', postRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/auth", authRoutes);
 
+
+
 connectDB(); // Connect to MongoDB 
 
 const PORT = process.env.PORT || 5000;
@@ -27,6 +29,8 @@ const PORT = process.env.PORT || 5000;
 app.get("/", (req, res) => {
 res.send("🌍 API is running...");
 });
+
+
 
 app.listen(PORT, () => {
 console.log(`🚀 Server running on http://localhost:${PORT}`);

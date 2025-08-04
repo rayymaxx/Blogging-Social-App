@@ -1,4 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { useEffect,} from 'react';
 import { useState, createContext, useContext } from 'react';
 import Header from './components/Header';
 import Sidebar from './components/Sidebar';
@@ -14,6 +15,7 @@ import DashboardPage from './pages/DashboardPage';
 import NotificationPage from './pages/NotificationPage';
 import Chatbot from './components/Chatbot';
 import Alert from './components/Alert';
+import axios from 'axios';
 
 // Context for sidebar state
 export const SidebarContext = createContext();
@@ -27,6 +29,7 @@ function App() {
   const [user, setUser] = useState(null);
   const [alert, setAlert] = useState(null);
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [msg, setMsg] = useState('');
 
   const showAlert = (message, type = 'success') => {
     setAlert({ message, type });
@@ -37,6 +40,15 @@ function App() {
     setIsDarkMode(!isDarkMode);
     document.documentElement.classList.toggle('dark');
   };
+   useEffect(() => {
+  axios.get('/api/hello')
+    .then(res => {
+      setMsg(res.data.message);
+    })
+    .catch(err => {
+      console.error("❌ Axios API Error:", err);
+    });
+}, []);
 
   return (
     <AuthContext.Provider value={{ isAuthenticated, setIsAuthenticated, user, setUser }}>
@@ -62,7 +74,8 @@ function App() {
                     <Route path="/notifications" element={<NotificationPage />} />
                   </Routes>
                 </main>
-                
+                <p className="text-center text-green-600 font-medium mt-4">{msg}</p>
+
                 <Chatbot />
                 {alert && <Alert message={alert.message} type={alert.type} />}
               </div>
