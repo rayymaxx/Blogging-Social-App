@@ -21,7 +21,7 @@ src_path = os.path.join(current_dir, 'src')
 if src_path not in sys.path:
     sys.path.insert(0, src_path)
 
-from src.social_blogging_app.crew import SocialBloggingApp
+from src.socialbloggingcrew.crew import SocialBloggingApp
 
 # Initialize FastAPI app
 app = FastAPI(title="Social Blogging API", version="1.0")
