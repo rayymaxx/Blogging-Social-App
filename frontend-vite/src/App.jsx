@@ -41,7 +41,8 @@ function App() {
     document.documentElement.classList.toggle('dark');
   };
    useEffect(() => {
-  axios.get('/api/hello')
+  axios.get(`${import.meta.env.VITE_API_URL}/api/hello`)
+
     .then(res => {
       setMsg(res.data.message);
     })
