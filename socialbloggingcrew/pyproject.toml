@@ -1,19 +1,19 @@
 [project]
-name = "socialbloggingcrew"
+name = "social_blogging_app"
 version = "0.1.0"
-description = "SocialBloggingCrew using crewAI"
-authors = [{ name = "Your Name", email = "you@example.com" }]
+description = "Social_blogging_app using crewAI"
+authors = [{ name = "Ushindi Sidi", email = "sidiushindi@gmail.com" }]
 requires-python = ">=3.10,<3.14"
 dependencies = [
-    "crewai[tools]>=0.150.0,<1.0.0"
+    "crewai[tools]>=0.152.0,<1.0.0"
 ]
 
 [project.scripts]
-socialbloggingcrew = "socialbloggingcrew.main:run"
-run_crew = "socialbloggingcrew.main:run"
-train = "socialbloggingcrew.main:train"
-replay = "socialbloggingcrew.main:replay"
-test = "socialbloggingcrew.main:test"
+social_blogging_app = "social_blogging_app.main:run"
+run_crew = "social_blogging_app.main:run"
+train = "social_blogging_app.main:train"
+replay = "social_blogging_app.main:replay"
+test = "social_blogging_app.main:test"
 
 [build-system]
 requires = ["hatchling"]

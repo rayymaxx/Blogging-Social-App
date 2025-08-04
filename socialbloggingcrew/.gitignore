@@ -1,4 +1,7 @@
 .env
 __pycache__/
 .DS_Store
-venv/
+*.pyc
+.vscode/
+.idea/
+socialai-env/

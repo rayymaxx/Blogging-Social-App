@@ -1,98 +1,179 @@
 import os
-import traceback
+import sys
+import json
 from datetime import datetime
-from dotenv import load_dotenv
-from fastapi import FastAPI
-from fastapi.responses import JSONResponse
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from typing import Dict, Any, List
 
-# Corrected import to reflect the nested directory structure
-from socialbloggingcrew.src.socialbloggingcrew.crew import Socialbloggingcrew
-from socialbloggingcrew.src.socialbloggingcrew.db import save_blog, load_blogs
+#throttling imports
+from slowapi.errors import RateLimitExceeded
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_ipaddr
+import redis.asyncio as redis
 
-# Load environment variables from a .env file
-load_dotenv()
+# Import logger
+from logger import logger
 
-# Define the FastAPI app
-app = FastAPI(
-    title="AI Content Generation API",
-    description="A multi-agent system to generate social media blog posts.",
-    version="1.0.0"
-)
+# Add 'src' directory to Python path
+current_dir = os.path.dirname(os.path.abspath(__file__))
+src_path = os.path.join(current_dir, 'src')
+if src_path not in sys.path:
+    sys.path.insert(0, src_path)
 
-# Configure CORS (Cross-Origin Resource Sharing) to allow requests from any origin
+from src.social_blogging_app.crew import SocialBloggingApp
+
+# Initialize FastAPI app
+app = FastAPI(title="Social Blogging API", version="1.0")
+logger.info("Social Blogging API starting up...")
+
+# I am setting a limit of 5 requests per minute, per IP address.
+limiter = Limiter(key_func=get_ipaddr, default_limits=["5/minute"])
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
+# Added CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Allows all origins
+    allow_origins=["*"],
     allow_credentials=True,
-    allow_methods=["*"],  # Allows all methods (GET, POST, etc.)
-    allow_headers=["*"],  # Allows all headers
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
-# Pydantic model for the request body to generate a blog post
+# Pydantic input model
 class BlogRequest(BaseModel):
     topic: str
-    tone: str = "professional"  # Default value for the tone
-    platform: str = "general"   # Default value for the platform
 
+# Root endpoint
 @app.get("/")
-async def read_root():
-    """
-    Root endpoint to verify the API is running.
-    """
-    return {"message": "Welcome to the AI Content Generation API!"}
+def read_root():
+    logger.info("Root endpoint accessed")
+    return {"message": "Welcome to the Social Blogging API"}
 
+#  generate_blog function
 @app.post("/api/generate-blog")
-async def generate_blog_post(request: BlogRequest):
-    """
-    Endpoint to trigger the multi-agent crew to generate a social media blog post.
-    """
-    try:
-        # Instantiate the crew
-        crew = Socialbloggingcrew().create_crew()
+def generate_blog(request: BlogRequest):
+    logger.info(f"Blog generation requested for topic: '{request.topic}'")
+    
+    if not request.topic.strip():
+        logger.warning("Empty topic provided")
+        raise HTTPException(status_code=400, detail="Topic cannot be empty")
 
-        # Create the input dictionary for the crew's kickoff method
-        inputs = {
-            'topic': request.topic,
-            'tone': request.tone,
-            'platform': request.platform,
-            'current_year': str(datetime.now().year)
+    # Preparing crew inputs
+    inputs = {
+        "blog_topic": request.topic,
+        "current_year": str(datetime.now().year),
+        "platform_guidelines": "Follow our standard editorial guidelines for clarity, tone, and style."
+    }
+
+    try:
+        logger.info("Starting crew execution...")
+        # Initializing and run crew
+        crew_app = SocialBloggingApp()
+        result = crew_app.crew().kickoff(inputs=inputs)
+        logger.info("Crew execution completed successfully")
+
+        # Handles the CrewOutput object and parse its raw string attribute.
+        raw_result_string = ""
+        if hasattr(result, 'raw'):
+            raw_result_string = result.raw
+        else:
+            raise ValueError(f"Unexpected crew result format: {type(result)}. The output is missing the 'raw' attribute.")
+
+        # DEBUG: Log the raw result
+        logger.info(f"Raw crew output: {raw_result_string}")
+
+        # Cleaning and parse the JSON string from the raw attribute
+        cleaned_result_string = raw_result_string.strip()
+        # Remove any trailing markdown code block tags if they exist
+        if cleaned_result_string.startswith("```json"):
+            cleaned_result_string = cleaned_result_string.replace("```json", "").strip()
+        if cleaned_result_string.endswith("```"):
+            cleaned_result_string = cleaned_result_string.rsplit("```", 1)[0].strip()
+
+        # DEBUG: Log the cleaned result
+        logger.info(f"Cleaned result string: {cleaned_result_string}")
+
+        parsed_result = json.loads(cleaned_result_string)
+
+        # DEBUG: Log the parsed JSON structure
+        logger.info(f"Parsed JSON keys: {list(parsed_result.keys())}")
+        logger.info(f"Full parsed result: {json.dumps(parsed_result, indent=2)}")
+
+        # Extract title - try multiple possible keys
+        title = (parsed_result.get("title") or 
+                parsed_result.get("blogTitle") or 
+                parsed_result.get("blog_title") or
+                f"Top {request.topic.title()} Insights and Trends")
+        
+        # Get the main content - try multiple possible keys
+        blog_content = (parsed_result.get("summary") or 
+                       parsed_result.get("blog_summary") or 
+                       parsed_result.get("blogSummary") or 
+                       parsed_result.get("content") or
+                       "No content was generated.")
+        
+        # Get meta description
+        meta_description = (parsed_result.get("meta_description") or 
+                           parsed_result.get("metaDescription") or 
+                           parsed_result.get("meta_desc") or
+                           f"A comprehensive guide about {request.topic}.")
+        
+        # Extract social media posts
+        social_media_posts = parsed_result.get("social_media_posts", {})
+        
+        # DEBUG: Log social media posts
+        logger.info(f"Social media posts found: {social_media_posts}")
+        logger.info(f"Social media posts type: {type(social_media_posts)}")
+        
+        # Extract hashtags from all social media posts
+        hashtags = set()  # Using set to avoid duplicates
+        
+        if isinstance(social_media_posts, dict):
+            for platform, post in social_media_posts.items():
+                logger.info(f"Processing {platform}: {post}")
+                # Extract hashtags from each social media post
+                if isinstance(post, str):
+                    words = post.split()
+                    for word in words:
+                        if word.startswith('#'):
+                            hashtag = word.strip('#').strip('.,!?()').lower()
+                            if hashtag:  # Only add non-empty hashtags
+                                hashtags.add(hashtag)
+                                logger.info(f"Found hashtag: {hashtag}")
+        
+        # Convert set back to list and add fallback if no hashtags found
+        hashtags_list = list(hashtags) if hashtags else [request.topic.lower().replace(' ', '')]
+        
+        # DEBUG: Log final hashtags
+        logger.info(f"Final hashtags: {hashtags_list}")
+        
+        # Preparing the final, comprehensive output
+        final_output = {
+            "title": title,
+            "content": blog_content,
+            "meta_description": meta_description,
+            "social_media_posts": social_media_posts,  
+            "hashtags": hashtags_list
         }
-        
-        # Run the crew and get the final result
-        result = crew.kickoff(inputs=inputs)
-        
-        # Save the generated content to a JSON file
-        save_blog({'topic': request.topic, 'content': result})
-        
-        # Return the generated content as a JSON response
-        return {"result": result}
-        
-    except Exception as e:
-        # Catch any exception, print the full traceback for debugging,
-        # and return a 500 status code with an error message
-        traceback.print_exc()
-        return JSONResponse(
-            status_code=500,
-            content={"detail": f"An internal server error occurred: {str(e)}"}
-        )
 
-@app.get("/api/blogs")
-async def get_all_blogs():
-    """
-    Endpoint to retrieve all saved blog posts from the JSON file.
-    """
-    try:
-        # Load all blogs from the database file
-        blogs = load_blogs()
-        return {"blogs": blogs}
+        # DEBUG: Log final output
+        logger.info(f"Final output: {json.dumps(final_output, indent=2)}")
+
+        logger.info(f"Blog generation successful - Title: '{title}'")
+        return final_output
+
+    except json.JSONDecodeError as e:
+        logger.error(f"Failed to parse crew output as JSON: {e}")
+        logger.error(f"Raw string that failed to parse: {raw_result_string}")
+        raise HTTPException(status_code=500, detail=f"An error occurred: The crew's output was not valid JSON.")
     except Exception as e:
-        # Catch any exception, print the full traceback for debugging,
-        # and return a 500 status code with an error message
-        traceback.print_exc()
-        return JSONResponse(
-            status_code=500,
-            content={"detail": f"An internal server error occurred: {str(e)}"}
-        )
+        logger.error(f"Blog generation failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"An error occurred while generating the blog: {str(e)}")
+
+# Running with uvicorn if executed directly
+if __name__ == "__main__":
+    import uvicorn
+    logger.info("Starting Social Blogging API server...")
+    uvicorn.run(app, host="0.0.0.0", port=5000)
