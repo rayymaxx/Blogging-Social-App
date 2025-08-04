@@ -13,12 +13,18 @@ dotenv.config();
 const app = express();
 
 // Then use your middleware and routes
-app.use(cors());
+app.use(cors({
+  origin: 'https://blogging-social-app.vercel.app/', 
+  credentials: true
+}));
+
 app.use(express.json());
 
 app.use('/api/posts', postRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/auth", authRoutes);
+
+
 
 connectDB(); // Connect to MongoDB 
 
@@ -27,6 +33,11 @@ const PORT = process.env.PORT || 5000;
 app.get("/", (req, res) => {
 res.send("🌍 API is running...");
 });
+
+app.get("/api/hello", (req, res) => {
+  res.json({ message: "✅ Backend connected successfully!" });
+});
+
 
 app.listen(PORT, () => {
 console.log(`🚀 Server running on http://localhost:${PORT}`);
