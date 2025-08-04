@@ -1,0 +1,23 @@
+[project]
+name = "social_blogging_app"
+version = "0.1.0"
+description = "Social_blogging_app using crewAI"
+authors = [{ name = "Ushindi Sidi", email = "sidiushindi@gmail.com" }]
+requires-python = ">=3.10,<3.14"
+dependencies = [
+    "crewai[tools]>=0.152.0,<1.0.0"
+]
+
+[project.scripts]
+social_blogging_app = "social_blogging_app.main:run"
+run_crew = "social_blogging_app.main:run"
+train = "social_blogging_app.main:train"
+replay = "social_blogging_app.main:replay"
+test = "social_blogging_app.main:test"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.crewai]
+type = "crew"

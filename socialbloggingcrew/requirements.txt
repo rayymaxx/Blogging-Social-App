@@ -1,0 +1,15 @@
+fastapi==0.116.1
+uvicorn==0.35.0
+pydantic==2.11.7
+
+slowapi==0.1.9
+redis==6.2.0
+
+crewai==0.152.0
+crewai-tools==0.59.0
+
+chromadb==0.5.23
+sentence-transformers==5.0.0
+
+python-dotenv==1.1.1
+requests==2.32.4

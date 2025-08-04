@@ -1,0 +1,40 @@
+topic_research_task:
+  description: >
+    Using real-time data and search trends, identify a relevant and high-performing
+    blog topic focused on "{blog_topic}". The research must provide a clear
+    topic brief with key discussion points.
+  expected_output: >
+    A detailed topic brief including a compelling blog post title and a list of 5-7
+    key points to cover.
+  agent: trend_hunter
+
+blog_drafting_task:
+  description: >
+    Using the topic brief from the TrendHunterAgent and context from the RAG system,
+    write a full-length blog post. The content must be well-structured, engaging,
+    and ready for editing.
+  expected_output: >
+    A well-written and formatted blog post in markdown. The post should have a
+    title, headings, and clear paragraphs.
+  agent: writer_agent
+
+content_editing_task:
+  description: >
+    Review and edit the blog post draft for grammar, spelling, clarity, and tone.
+    The goal is to ensure the post is polished, error-free, and aligns perfectly with
+    the brand's voice and the platform's guidelines for "{platform_guidelines}".
+  expected_output: >
+    A final, polished version of the blog post, ready for summarization and publishing.
+  agent: editor_agent
+
+metadata_generation_task:
+  description: >
+    Based on the final edited blog post, create a short summary, a compelling
+    meta-description for search engines, and three distinct social media posts for
+    Twitter, LinkedIn, and Instagram.
+  expected_output: >
+    A structured JSON object containing the blog summary, meta-description, and three
+    platform-specific social media posts with relevant hashtags.
+  agent: summarizing_agent
+  output_file: blog_post_metadata.json
+  
