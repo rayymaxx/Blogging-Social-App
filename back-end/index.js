@@ -13,14 +13,7 @@ dotenv.config();
 // Creating the express app
 const app = express();
 
-<<<<<<< HEAD
-// Then use your middleware and routes
-app.use(cors({
-  origin: 'https://blogging-social-app.vercel.app/', 
-  credentials: true
-}));
 
-=======
 // Then we will  use middleware and routes
 app.use(cors());
 >>>>>>> ae2d965114eff26e0780444ec9cc2859fcd4e705
@@ -65,7 +58,10 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use(cors());
+app.use(cors({
+  origin: 'https://blogging-social-app.vercel.app/', 
+  credentials: true
+}));
 
 app.get("/", (req, res) => {
   res.send("API is running...");
