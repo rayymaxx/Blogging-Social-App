@@ -36,7 +36,7 @@ const Chatbot = () => {
     setInputMessage('');
   
     try {
-      const response = await fetch("https://<your-render-backend-url>/api/generate-blog", {
+      const response = await fetch("https://blogging-social-app-kcz5.onrender.com/api/generate-blog", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
