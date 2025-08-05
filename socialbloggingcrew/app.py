@@ -6,16 +6,16 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
-# Throttling imports
+# Throttling
 from slowapi.errors import RateLimitExceeded
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_ipaddr
 import redis.asyncio as redis
 
-# Import logger
+# Logger
 from logger import logger
 
-# Add 'src' directory to Python path
+# Add 'src' to Python path
 current_dir = os.path.dirname(os.path.abspath(__file__))
 src_path = os.path.join(current_dir, 'src')
 if src_path not in sys.path:
@@ -23,16 +23,16 @@ if src_path not in sys.path:
 
 from src.socialbloggingcrew.crew import SocialBloggingApp
 
-# Initialize FastAPI app
+# Initialize FastAPI
 app = FastAPI(title="Social Blogging API", version="1.0")
 logger.info("Social Blogging API starting up...")
 
-# Rate limiter setup: 5 requests per minute per IP
+# Rate limiter
 limiter = Limiter(key_func=get_ipaddr, default_limits=["5/minute"])
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
-# Enable CORS
+# CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -55,7 +55,6 @@ def parse_crew_output_json(raw_result_string: str) -> dict:
 
     cleaned = raw_result_string.strip()
 
-    # Remove markdown fencing if present
     if cleaned.startswith("```json"):
         cleaned = cleaned[len("```json"):].strip()
     if cleaned.endswith("```"):
@@ -70,7 +69,6 @@ def parse_crew_output_json(raw_result_string: str) -> dict:
         return parsed
     except json.JSONDecodeError as e:
         logger.error(f"JSON decoding failed: {e}")
-        logger.error(f"Invalid JSON string: {cleaned}")
         raise HTTPException(status_code=500, detail="Invalid JSON format from crew output.")
     except Exception as e:
         logger.error(f"Unexpected error while parsing JSON: {e}")
@@ -94,39 +92,41 @@ def generate_blog(request: BlogRequest):
         logger.info("Starting crew execution...")
         crew_app = SocialBloggingApp()
         result = crew_app.crew().kickoff(inputs=inputs)
+
         logger.info("Crew execution completed successfully")
 
-        if not hasattr(result, 'raw'):
-            raise ValueError("Missing 'raw' attribute in crew output.")
+        # Normalize the result
+        raw_result = getattr(result, "raw", None)
+        if not raw_result:
+            raise ValueError("Crew result does not contain 'raw' output.")
 
-        raw_result = result.raw
         logger.info(f"Raw crew output: {raw_result}")
 
         parsed_result = parse_crew_output_json(raw_result)
 
-        # Extract blog metadata
-        title = (parsed_result.get("title") or 
-                 parsed_result.get("blogTitle") or 
-                 parsed_result.get("blog_title") or 
+        # Extract data
+        title = (parsed_result.get("title") or
+                 parsed_result.get("blogTitle") or
+                 parsed_result.get("blog_title") or
                  f"Top {request.topic.title()} Insights and Trends")
 
-        content = (parsed_result.get("summary") or 
-                   parsed_result.get("blog_summary") or 
-                   parsed_result.get("blogSummary") or 
-                   parsed_result.get("content") or 
+        content = (parsed_result.get("summary") or
+                   parsed_result.get("blog_summary") or
+                   parsed_result.get("blogSummary") or
+                   parsed_result.get("content") or
                    "No content was generated.")
 
-        meta_description = (parsed_result.get("meta_description") or 
-                            parsed_result.get("metaDescription") or 
-                            parsed_result.get("meta_desc") or 
+        meta_description = (parsed_result.get("meta_description") or
+                            parsed_result.get("metaDescription") or
+                            parsed_result.get("meta_desc") or
                             f"A comprehensive guide about {request.topic}.")
 
         social_media_posts = parsed_result.get("social_media_posts", {})
 
-        # Extract hashtags
+        # Hashtag extraction
         hashtags = set()
         if isinstance(social_media_posts, dict):
-            for platform, post in social_media_posts.items():
+            for post in social_media_posts.values():
                 if isinstance(post, str):
                     for word in post.split():
                         if word.startswith('#'):
