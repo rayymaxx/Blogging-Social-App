@@ -24,28 +24,53 @@ const Chatbot = () => {
 
   const handleSendMessage = async () => {
     if (!inputMessage.trim()) return;
-
+  
     const userMessage = {
       id: Date.now(),
       type: 'user',
       content: inputMessage,
       timestamp: new Date()
     };
-
+  
     setMessages(prev => [...prev, userMessage]);
     setInputMessage('');
-
-    // Simulate bot response (replace with actual API call)
-    setTimeout(() => {
+  
+    try {
+      const response = await fetch("https://<your-render-backend-url>/api/generate-blog", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ topic: inputMessage })
+      });
+  
+      if (!response.ok) {
+        throw new Error("API error");
+      }
+  
+      const data = await response.json();
+  
       const botMessage = {
         id: Date.now() + 1,
         type: 'bot',
-        content: 'I understand your question. Let me help you with that!',
+        content: data.content || "Sorry, no blog content was generated.",
         timestamp: new Date()
       };
+  
       setMessages(prev => [...prev, botMessage]);
-    }, 1000);
-  };
+  
+    } catch (error) {
+      console.error("Error calling API:", error);
+      const botErrorMessage = {
+        id: Date.now() + 2,
+        type: 'bot',
+        content: "Oops! Something went wrong. Please try again later.",
+        timestamp: new Date()
+      };
+      setMessages(prev => [...prev, botErrorMessage]);
+    }
+};
+
 
   const handleKeyPress = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
